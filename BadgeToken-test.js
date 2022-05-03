@@ -4,7 +4,7 @@ const tokenABI = require("../artifacts/contracts/BadgeToken.sol/BadgeToken.json"
 
 describe("BadgeToken contract", function () {
   let BadgeToken, owner, tokenInstance, account1, addr1, addr2;
-  let tokenAddress = '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9';
+  let tokenAddress = '0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f';
 
   beforeEach(async function () {
    [owner, _name, _symbol, account1, addr1, addr2] = await ethers.getSigners();
@@ -31,19 +31,30 @@ describe("BadgeToken contract", function () {
       expect(await tokenInstance.balanceOf(addr1)).to.equal(2);      
     });
 
-    it("Should transfer tokens between accounts", async function () {
-        const ownerBalance = await tokenInstance.balanceOf(owner.address);
-        console.log(balanceOf(owner.address));
+    it("Should transferFrom of tokens between accounts", async function () {
+      const ownerBalance = await tokenInstance.balanceOf(owner.address);
+      expect(await tokenInstance.approve(addr1.address, 1))
+   .to.emit(tokenInstance, "Approval")
+   .withArgs(owner.address, addr1.address, 1);
 
-      await tokenInstance.transfer(addr1.address, 3);
-      const addr1Balance = await tokenInstance.balanceOf(addr1.address);
-      expect(addr1Balance).to.equal(3);
-
-
-      await tokenInstance.connect(addr1).transfer(addr2.address, 4);
-      const addr2Balance = await tokenInstance.balanceOf(addr2.address);
-      expect(addr2Balance).to.equal(4);
+    expect(await tokenInstance.connect(addr1).transferFrom(owner.address, addr1.address, 1))
+   .to.emit(tokenInstance, "Transfer")
+   .withArgs(owner.address, addr1.address, 1) ;
     });
+
+    // it("Should transfer tokens between accounts", async function () {
+    //     const ownerBalance = await tokenInstance.balanceOf(owner.address);
+    //     console.log(ownerBalance);
+
+    //   await tokenInstance.transfer(addr1.address, 1);
+    //   const addr1Balance = await tokenInstance.balanceOf(addr1.address);
+    //   expect(addr1Balance).to.equal(1);
+
+
+    //   await tokenInstance.connect(addr1).transfer(addr2.address, 2);
+    //   const addr2Balance = await tokenInstance.balanceOf(addr2.address);
+    //      expect(addr2Balance).to.equal(2);
+    // });
 
     it("Should fail if sender doesnt have enough tokens", async function () {
       const initialOwnerBalance = await tokenInstance.balanceOf(owner.address);
@@ -57,7 +68,7 @@ describe("BadgeToken contract", function () {
       );
     });
 
-    
 
-    });
+
+  });
 });
